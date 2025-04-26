@@ -105,3 +105,24 @@ body{
 .register p a:hover{
     text-decoration: underline;
 }
+.status-message {
+    text-align: center;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    display: none;
+}
+
+.status-message:not(:empty) {
+    display: block;
+}
+
+.status-message.success {
+    background-color: rgba(76, 175, 80, 0.3);
+    color: #fff;
+}
+
+.status-message.error {
+    background-color: rgba(244, 67, 54, 0.3);
+    color: #fff;
+}
