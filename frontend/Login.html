@@ -1,155 +1,76 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <title>Login</title>
-        <link rel="stylesheet" href="Login.css">
-        <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-        <meta charset="UTF-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    </head>
-    <body>
-        <div class="box">
-            <form id="loginForm">
-                <div>
-                    <h1>Login</h1>
-                </div>
-                <div id="statusMessage" class="status-message"></div>
-                <div class="input-box">
-                    <input type="text" id="username" placeholder="Username" required>
-                    <i class='bx bxs-user'></i>
-                </div>
-                <div class="input-box">
-                    <input type="password" id="password" placeholder="Password" required>
-                    <i class='bx bxs-lock-alt'></i>
-                </div>
-                <div class="remember-forgot">
-                    <label>
-                        <input type="checkbox" class="checkbox">Remember me
-                    </label> 
-                    <a href="#">Forgot password?</a>
-                </div>
-                <button type="submit" class="submit-login">Login</button>
-                <div class="register">
-                    <p>Don't have an account? <a href="#" id="registerLink">Register</a></p>
-                </div>
-            </form>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    />
+    <link rel="stylesheet" href="Login.css" />
+    <title>Login Page</title>
+  </head>
+
+  <body>
+    <div class="container" id="container">
+      <div class="form-container sign-up">
+        <form>
+          <h1>Create Account</h1>
+          <div class="social-icons">
+            <a href="#" class="icon"
+              ><i class="fa-brands fa-google-plus-g"></i
+            ></a>
+            <a href="#" class="icon"><i class="fa-brands fa-facebook-f"></i></a>
+            <a href="#" class="icon"><i class="fa-brands fa-github"></i></a>
+            <a href="#" class="icon"
+              ><i class="fa-brands fa-linkedin-in"></i
+            ></a>
+          </div>
+          <span>or use your email for registration</span>
+          <input type="text" placeholder="Full Name" />
+          <input type="email" placeholder="Email" />
+          <input type="password" placeholder="Password" />
+          <button>Sign Up</button>
+        </form>
+      </div>
+      <div class="form-container sign-in">
+        <form>
+          <h1>Sign In</h1>
+          <div class="social-icons">
+            <a href="#" class="icon"
+              ><i class="fa-brands fa-google-plus-g"></i
+            ></a>
+            <a href="#" class="icon"><i class="fa-brands fa-facebook-f"></i></a>
+            <a href="#" class="icon"><i class="fa-brands fa-github"></i></a>
+            <a href="#" class="icon"
+              ><i class="fa-brands fa-linkedin-in"></i
+            ></a>
+          </div>
+          <span>or use your email password</span>
+          <input type="email" placeholder="Email" />
+          <input type="password" placeholder="Password" />
+          <a href="#">Forget Your Password?</a>
+          <button>Sign In</button>
+        </form>
+      </div>
+      <div class="toggle-container">
+        <div class="toggle">
+          <div class="toggle-panel toggle-left">
+            <h1>Welcome Back!</h1>
+            <p>Enter your personal details to use all of site features</p>
+            <button class="hidden" id="login">Sign In</button>
+          </div>
+          <div class="toggle-panel toggle-right">
+            <h1>Hello, Friend!</h1>
+            <p>
+              Register with your personal details to use all of site features
+            </p>
+            <button class="hidden" id="register">Sign Up</button>
+          </div>
         </div>
+      </div>
+    </div>
 
-        <script>
-            class AuthService {
-                static async login(username, password) {
-                    try {
-                        const response = await fetch('http://localhost:5000/api/auth/login', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({ username, password })
-                        });
-                        return await response.json();
-                    } catch (error) {
-                        throw new Error('Failed to connect to server');
-                    }
-                }
-
-                static async register(username, password) {
-                    try {
-                        const response = await fetch('http://localhost:5000/api/auth/register', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({ username, password })
-                        });
-                        return await response.json();
-                    } catch (error) {
-                        throw new Error('Failed to connect to server');
-                    }
-                }
-                
-                static async register(username, email, password, fullName) {
-                try {
-                    const response = await fetch('http://localhost:5000/api/auth/register', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ 
-                            username, 
-                            email, 
-                            password,
-                            fullName 
-                        })
-                    });
-                    return await response.json();
-                } catch (error) {
-                    throw new Error('Failed to connect to server');
-                }
-            }
-            }
-
-            // Login handler
-            document.getElementById('loginForm').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                
-                const username = document.getElementById('username').value;
-                const password = document.getElementById('password').value;
-                const statusMessage = document.getElementById('statusMessage');
-
-                try {
-                    console.log('Attempting login...'); // Debug log
-                    statusMessage.textContent = 'Logging in...';
-                    statusMessage.className = 'status-message';
-                    
-                    const data = await AuthService.login(username, password);
-                    console.log('Server response:', data); // Debug log
-
-                    if (data.success) {
-                        statusMessage.textContent = 'Login successful!';
-                        statusMessage.className = 'status-message success';
-                        setTimeout(() => {
-                            window.location.href = 'index.html'; // Redirect to home page
-                        }, 1500);
-                    } else {
-                        statusMessage.textContent = data.message;
-                        statusMessage.className = 'status-message error';
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    statusMessage.textContent = 'Error connecting to server';
-                    statusMessage.className = 'status-message error';
-                }
-            });
-
-            // Registration handler
-            document.getElementById('registerLink').addEventListener('click', async (e) => {
-                e.preventDefault();
-                
-                const username = document.getElementById('username').value;
-                const password = document.getElementById('password').value;
-
-                if (!username || !password) {
-                    alert('Please fill in both username and password');
-                    return;
-                }
-
-                try {
-                    console.log('Attempting registration...'); // Debug log
-                    const data = await AuthService.register(username, password);
-                    console.log('Server response:', data); // Debug log
-                    alert(data.message);
-
-                    if (data.success) {
-                        // Clear form after successful registration
-                        document.getElementById('username').value = '';
-                        document.getElementById('password').value = '';
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    alert('Error connecting to server');
-                }
-            });
-        </script>
-    </body>
+    <script src="Login.js"></script>
+  </body>
 </html>

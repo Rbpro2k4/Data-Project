@@ -28,22 +28,10 @@ app.use(bodyParser.json());
 // Login endpoint
 app.post('/api/auth/login', async (req, res) => {
     try {
-        console.log('Login attempt with:', req.body); // Debug log
-
         const { username, password } = req.body;
 
-        // Validate input
-        if (!username || !password) {
-            return res.status(400).json({
-                success: false,
-                message: 'Please provide username and password'
-            });
-        }
-
-        // Find user in database
+        // Find user
         const user = await User.findOne({ username });
-        console.log('User found:', user ? 'Yes' : 'No'); // Debug log
-
         if (!user) {
             return res.status(401).json({
                 success: false,
@@ -52,9 +40,7 @@ app.post('/api/auth/login', async (req, res) => {
         }
 
         // Verify password
-        const isMatch = await bcrypt.compare(password, user.password);
-        console.log('Password match:', isMatch ? 'Yes' : 'No'); // Debug log
-
+        const isMatch = await user.comparePassword(password);
         if (!isMatch) {
             return res.status(401).json({
                 success: false,
@@ -65,7 +51,7 @@ app.post('/api/auth/login', async (req, res) => {
         // Create JWT token
         const token = jwt.sign(
             { userId: user._id },
-            process.env.JWT_SECRET,
+            process.env.JWT_SECRET || 'your-secret-key',
             { expiresIn: '1h' }
         );
 
@@ -84,13 +70,12 @@ app.post('/api/auth/login', async (req, res) => {
         console.error('Login error:', error);
         res.status(500).json({
             success: false,
-            message: 'Server error',
-            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+            message: 'Server error'
         });
     }
 });
 
-// Register endpoint (optional)
+// Register endpoint
 app.post('/api/auth/register', async (req, res) => {
     try {
         const { username, email, password, fullName } = req.body;
@@ -110,15 +95,11 @@ app.post('/api/auth/register', async (req, res) => {
             });
         }
 
-        // Hash password
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
-
         // Create new user
         user = new User({
             username,
             email,
-            password: hashedPassword,
+            password,
             fullName
         });
 
@@ -137,6 +118,7 @@ app.post('/api/auth/register', async (req, res) => {
         });
     }
 });
+
 app.post('/api/schedule/add', (req, res) => {
     const { Title, email, Description, StartTime, EndTime, Invited } = req.body;
 

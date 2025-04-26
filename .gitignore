@@ -1,5 +1,6 @@
 # Dependencies
 node_modules/
+package-lock.json
 
 # Environment variables
 .env
@@ -15,14 +16,34 @@ yarn-error.log*
 # OS files
 .DS_Store
 Thumbs.db
+desktop.ini
 
 # IDE files
 .vscode/
 .idea/
+*.sublime-project
+*.sublime-workspace
 
 # Build output
 dist/
 build/
+public/dist/
 
 # Cache
 .npm
+.eslintcache
+.cache
+.temp
+
+# Testing
+coverage/
+.nyc_output/
+
+# Miscellaneous
+*.bak
+*.swp
+*.swo
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes

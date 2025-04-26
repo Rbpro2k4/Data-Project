@@ -10,7 +10,10 @@ body{
     Oxygen, Ubuntu, Cantarell, 'Open Sans',
     'Helvetica Neue', sans-serif;
 
-    background-color: black;
+    background: url('images/calendar/elevated-view-laptop-earphones-crumpled-papers-pencil-blank-spiral-notepad-frame-black-background_23-2148080331.jpg') no-repeat;
+    background-size: cover; /* This makes the image cover the whole page */
+    background-position: center center; /* Center the image */
+    
     color: #e7e7e7;
     min-height: 100vh;
     line-height: 1.5;
@@ -33,11 +36,13 @@ body{
     z-index: -1;
 }
 .container{
-    width: 100%;
+    width: 1897px;
     margin: 0 auto;
     padding: 0 2rem;
     position: relative;
     overflow: hidden;
+ 
+    padding-bottom: 40px;
 }
 header{
     display: flex;
@@ -91,10 +96,19 @@ main{
     max-width: 40rem;
     margin-left: 10%;
     z-index: 999;
+   
+    padding: 2rem;
+    border-radius: 20px;
+    background-color: rgba(16, 4, 32, 0.8);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+   
+    
 
 }
 .tag-box{
+    margin-left: 145px;
     position: relative;
+    
     width: 18rem;
     height: 2.5rem;
     border-radius: 50px;
@@ -103,6 +117,14 @@ main{
     background-size: 200%;
     animation: animationGradient 2.5s linear infinite;
     box-shadow:0 0 15px rgba(255,255,255,0.3);
+}
+.logo{
+    box-shadow: 0 0 15px rgba(255,255,255,0.3);
+   
+    
+    
+    
+
 }
 @keyframes animationGradient{
     to{
@@ -142,19 +164,7 @@ main{
     gap: 1rem;
     margin-top: 3rem;
 }
-.btn-get-started{
-    text-decoration: none;
-    border: 1px solid #2a2a2a;
-    padding: 0.7rem 1.2rem;
-    border-radius: 50px;
-    font-size: 1.2rem;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    transition: background-color 0.2s ease;
-}
-.btn-get-started:hover{
-background-color: #1a1a1a;
-}
+
 
 .btn-signing-main{
     text-decoration: none;
@@ -166,6 +176,7 @@ background-color: #1a1a1a;
     font-weight: 600;
     letter-spacing: 0.1em;
     transition: background-color 0.2s ease;
+    margin-left: 185px;
 }
 .btn-signing-main:hover{
     background-color :gray;
@@ -175,6 +186,14 @@ background-color: #1a1a1a;
     top: 0;
     right: -20%;
     scale:0.7;
+}
+.logo{
+    margin-left: 200px;
+    margin-top: 30px;
+    margin-bottom: 30px;
+    width: 90px;
+    height: 90px;
+    border-radius: 40px;
 }
 
 
@@ -212,10 +231,8 @@ background-color: #1a1a1a;
     .description{
         font-size: 1rem;
     }
-    .btn-get-started{
-        font-size:0.8rem;
-        padding: 0.8rem 1.2rem;
-    }
+    
+
     .btn-signing-main{
         font-size: 0.8rem;
         padding: 0.8rem 2rem;
