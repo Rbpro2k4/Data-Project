@@ -27,7 +27,9 @@ body {
   align-items: center;
   justify-content: center;
   padding-bottom: 30px;
-  background-color: #f5f5f5;
+  background:url('images/calendar/top-view-workspace-with-glasses-cup-tea_23-2148430818.jpg') no-repeat;
+  background-size: cover; /* This makes the image cover the whole page */
+  background-position: center center; /* Center the image */
 }
 .container {
   position: relative;
@@ -39,7 +41,9 @@ body {
   display: flex;
 
   border-radius: 10px;
-  background-color: gray;
+  background: rgba(255, 255, 255, 0.5); /* Semi-transparent white */
+      backdrop-filter: blur(10px); /* The blur effect */
+      -webkit-backdrop-filter: blur(10px); /* Safari support */
 }
 .left {
   width: 60%;
@@ -268,7 +272,7 @@ body {
 .right .today-date .event-date {
   font-size: 1rem;
   font-weight: 400;
-  color: #878895;
+  color: #ffffff;
 }
 .events {
   width: 100%;
@@ -356,8 +360,8 @@ body {
   align-items: center;
   justify-content: center;
   font-size: 1rem;
-  color: #878895;
-  border: 2px solid #878895;
+  color: #f7f5f5;
+  border: 2px solid #f1f1f1;
   opacity: 0.5;
   border-radius: 50%;
   background-color: transparent;

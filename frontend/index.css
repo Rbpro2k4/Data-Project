@@ -10,7 +10,7 @@ body{
     Oxygen, Ubuntu, Cantarell, 'Open Sans',
     'Helvetica Neue', sans-serif;
 
-    background: url('images/calendar/elevated-view-laptop-earphones-crumpled-papers-pencil-blank-spiral-notepad-frame-black-background_23-2148080331.jpg') no-repeat;
+    background: url('images/index/elevated-view-laptop-earphones-crumpled-papers-pencil-blank-spiral-notepad-frame-black-background_23-2148080331.jpg') no-repeat;
     background-size: cover; /* This makes the image cover the whole page */
     background-position: center center; /* Center the image */
     
@@ -43,6 +43,16 @@ body{
     overflow: hidden;
  
     padding-bottom: 40px;
+}
+.nav-link{
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: 0.1rem;
+    transition: color 0.2s ease;
+    text-decoration: none;
+}
+.nav-link:hover{
+    color: #a7a7a7;
 }
 header{
     display: flex;
@@ -81,7 +91,9 @@ nav a:hover{
     font-weight: 500;
     transition: background-color 0.2s ease;
     cursor: pointer;
+    font-size: 20px;
 }
+
 .signin-btn:hover{
     background-color: white;
 }

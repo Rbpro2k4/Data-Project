@@ -12,6 +12,7 @@ const User=require('./User');
 const Schedule=require('./Schedule');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const path = require('path');
 
 const bodyParser = require('body-parser');
 
@@ -24,6 +25,50 @@ connectDB();
 
 app.use(cors());
 app.use(bodyParser.json());
+
+// Serve static files from the public directory
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Serve frontend files
+app.use(express.static(path.join(__dirname, '../frontend')));
+
+// Add CSP headers
+app.use((req, res, next) => {
+    res.setHeader(
+        'Content-Security-Policy',
+        "default-src 'self' https://*.ngrok-free.app; " +
+        "font-src 'self' data: https://*.ngrok-free.app; " +
+        "img-src 'self' data: https://*.ngrok-free.app; " +
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.ngrok-free.app; " +
+        "style-src 'self' 'unsafe-inline' https://*.ngrok-free.app;"
+    );
+    next();
+});
+
+// Favicon route
+app.get('/favicon.ico', (req, res) => {
+    res.sendFile(__dirname + '/public/favicon.ico');
+});
+
+// Root route
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/index.html'));
+});
+
+// Login route
+app.get('/login', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/Login.html'));
+});
+
+// Home route
+app.get('/home', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/Home.html'));
+});
+
+// Calendar route
+app.get('/calendar', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/Calender.html'));
+});
 
 // Login endpoint
 app.post('/api/auth/login', async (req, res) => {
@@ -423,12 +468,6 @@ app.post('/api/schedule/all', (req, res) => {
         console.error('Error finding user:', err);
         res.status(500).json({ success: false, message: 'Error looking up user' });
     });
-});
-
-
-
-app.get('/', (req, res) => {
-    res.send('API Running');
 });
 
 app.listen(PORT, () => {

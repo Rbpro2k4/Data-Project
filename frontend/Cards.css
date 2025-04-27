@@ -1,0 +1,189 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background: url('images/Cards/top-view-workspace.jpg') no-repeat;
+  background-size: cover;
+  background-attachment: fixed;
+  background-position: center;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+}
+
+.cards-container {
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
+
+h2 {
+  font-size: 30px;
+  text-align: center;
+}
+
+.flip-card {
+  width: 300px;
+  height: 400px;
+  perspective: 1000px;
+}
+
+.flip-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: 1s;
+}
+
+.flip-card:hover .flip-card-inner {
+  transform: rotateY(180deg);
+}
+
+.front,
+.back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  padding: 20px;
+  border-radius: 20px;
+  box-shadow: 5px 20px 25px rgba(0, 0, 0, 0.5);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.front {
+  background: linear-gradient(150deg, #fbe9bf, #d4c2a7, #c9b090);
+  color: #1c1c1c;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.front img {
+  width: 150px;
+  height: 150px;
+  border-radius: 75px;
+  object-fit: cover;
+  border: 4px solid #1c1c1c;
+  margin-bottom: 10px;
+  box-shadow: 3px 6px 10px rgba(0, 0, 0, 0.5);
+}
+
+.front p {
+  margin-bottom: 20px;
+}
+
+.line {
+  width: 100%;
+  height: 1px;
+  background: #5b5c5b;
+}
+
+.bottom {
+  margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.rating {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.bottom span {
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.bottom h3 {
+  font-size: 25px;
+  font-weight: 500;
+}
+
+.back {
+  background: linear-gradient(150deg, #313330, #23211f, #1c1c1c);
+  color: #fbe9bf;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+  transform: rotateY(180deg);
+}
+
+.skills {
+  margin: 10px 0 16px;
+}
+
+.skill {
+  margin-bottom: 25px;
+}
+
+.skill h6 {
+  margin-bottom: 8px;
+  font-size: 16px;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.bar {
+  position: relative;
+  background: #fbe9bf;
+  height: 5px;
+}
+
+.circle {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  background: #fbe9bf;
+  right: -2px;
+  top: -11px;
+  border-radius: 50%;
+  color: #1c1c1c;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 5px;
+  border: 2px solid #1c1c1c;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Animations for each card's bars */
+.flip-card:hover .html-jacques { width: 85%; animation: animate-html 2s linear; }
+.flip-card:hover .css-jacques { width: 70%; animation: animate-css 2s linear; }
+.flip-card:hover .js-jacques { width: 40%; animation: animate-js 2s linear; }
+
+.flip-card:hover .html-jean { width: 87%; animation: animate-html-jean 2s linear; }
+.flip-card:hover .css-jean { width: 63%; animation: animate-css-jean 2s linear; }
+.flip-card:hover .js-jean { width: 35%; animation: animate-js-jean 2s linear; }
+
+.flip-card:hover .html-charbel { width: 92%; animation: animate-html-charbel 2s linear; }
+.flip-card:hover .css-charbel { width: 88%; animation: animate-css-charbel 2s linear; }
+.flip-card:hover .js-charbel { width: 39%; animation: animate-js-charbel 2s linear; }
+
+@keyframes animate-html { from { width: 0; } to { width: 85%; } }
+@keyframes animate-css { from { width: 0; } to { width: 70%; } }
+@keyframes animate-js { from { width: 0; } to { width: 40%; } }
+
+@keyframes animate-html-jean { from { width: 0; } to { width: 87%; } }
+@keyframes animate-css-jean { from { width: 0; } to { width: 63%; } }
+@keyframes animate-js-jean { from { width: 0; } to { width: 35%; } }
+
+@keyframes animate-html-charbel { from { width: 0; } to { width: 92%; } }
+@keyframes animate-css-charbel { from { width: 0; } to { width: 88%; } }
+@keyframes animate-js-charbel { from { width: 0; } to { width: 39%; } }
