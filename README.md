@@ -2,6 +2,9 @@
 
 A full-stack calendar application with user authentication and event management capabilities. Built by Team Infinite Loopers.
 
+## Project Presentation
+[View our project presentation on Canva](https://www.canva.com/design/DAGl3G8CkoU/lpR7ETiiLldMSoCCU4KWMg/edit?utm_content=DAGl3G8CkoU&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton)
+
 ## Features
 
 - User Authentication (Login/Register)
@@ -99,7 +102,30 @@ ngrok http 5000
    - Backend API: Available at your ngrok URL
    - Example: `https://xxxx-xx-xx-xxx-xx.ngrok-free.app/api/auth/login`
 
-Note: The ngrok URL changes each time you restart ngrok unless you have a paid account.
+### Persistent URL Setup (Premium)
+
+To maintain the same URL across server restarts:
+
+1. Sign up for a paid ngrok account at https://ngrok.com/pricing
+
+2. Get your auth token from ngrok dashboard
+
+3. Update your `.env` file with:
+```env
+NGROK_AUTH_TOKEN=your_auth_token
+NGROK_SUBDOMAIN=your-chosen-subdomain
+```
+
+4. Start the server:
+```bash
+cd backend
+npm start
+```
+
+Your application will always be available at:
+`https://your-chosen-subdomain.ngrok.io`
+
+Note: Reserved domains are only available with paid ngrok accounts.
 
 ### Security Considerations
 - Update your CORS settings in `backend/server.js` to allow ngrok domain
