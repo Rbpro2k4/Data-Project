@@ -210,3 +210,43 @@ body{
 .container.active .toggle-right{
     transform: translateX(200%);
 }
+
+.message-box {
+    padding: 10px;
+    border-radius: 5px;
+    margin: 10px 0;
+    text-align: center;
+    display: none;
+    width: 100%;
+}
+
+.error-message {
+    background-color: #ffebee;
+    color: #c62828;
+    border: 1px solid #ef5350;
+    display: block;
+}
+
+.success-message {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #66bb6a;
+    display: block;
+}
+
+.server-config {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+    width: 100%;
+}
+
+.server-config input {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.server-config button {
+    padding: 5px 15px;
+    font-size: 0.8em;
+}

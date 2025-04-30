@@ -164,89 +164,44 @@ app.post('/api/auth/register', async (req, res) => {
     }
 });
 
-app.post('/api/schedule/add', (req, res) => {
-    const { Title, email, Description, StartTime, EndTime, Invited } = req.body;
+app.post('/api/schedule/add', async (req, res) => {
+    console.log('Received event data:', req.body);
+    try {
+        const { Title, email, Description, StartTime, EndTime, Invited } = req.body;
 
-    User.findOne({ email }).then(existingUser => {
-        if (!existingUser) {
-            return res.status(400).json({ success: false, message: 'Email does not exist' });
+        // Find the creator user
+        const creator = await User.findOne({ email });
+        if (!creator) {
+            console.log('Creator not found:', email);
+            return res.status(400).json({ success: false, message: 'Creator email not found' });
         }
 
-        const Creator = existingUser._id;
-        const CreatedAt = new Date();
-        const UpdatedAt = CreatedAt;
-        const Status = false;
-
-        // Step 1: Check for exact duplicate schedule
-        Schedule.findOne({
-            Creator,
+        // Create schedule
+        const schedule = await Schedule.create({
+            Creator: creator._id,
             Title,
-            StartTime: new Date(StartTime),
-            EndTime: new Date(EndTime)
-        }).then(duplicate => {
-            if (duplicate) {
-                return res.status(400).json({ success: false, message: 'Schedule already exists with the same time and title' });
-            }
-
-            // Step 2: Check for time overlap
-            Schedule.findOne({
-                Creator,
-                StartTime: { $lt: new Date(EndTime) },
-                EndTime: { $gt: new Date(StartTime) }
-            }).then(overlap => {
-                if (overlap) {
-                    return res.status(400).json({ success: false, message: 'You already have a schedule during this time' });
-                }
-
-                const createSchedule = (validInvited = []) => {
-                    Schedule.create({
-                        Title,
-                        Description,
-                        StartTime,
-                        EndTime,
-                        Creator,
-                        Invited: validInvited,
-                        CreatedAt,
-                        UpdatedAt,
-                        Status
-                    }).then(schedule => {
-                        res.json({ success: true, message: 'Schedule created successfully!', schedule });
-                    }).catch(err => {
-                        console.error('Schedule creation error:', err);
-                        res.status(500).json({ success: false, message: 'Failed to create schedule' });
-                    });
-                };
-
-                // Step 3: Validate invited users (optional)
-                if (Array.isArray(Invited) && Invited.length > 0) {
-                    User.find({ _id: { $in: Invited } }).select('_id').then(validUsers => {
-                        if (validUsers.length !== Invited.length) {
-                            return res.status(400).json({ success: false, message: 'One or more invited user IDs are invalid' });
-                        }
-                        const validInvited = validUsers.map(u => u._id);
-                        createSchedule(validInvited);
-                    }).catch(err => {
-                        console.error('Invited ID validation error:', err);
-                        res.status(500).json({ success: false, message: 'Error checking invited users' });
-                    });
-                } else {
-                    createSchedule([]);
-                }
-
-            }).catch(err => {
-                console.error('Overlap check error:', err);
-                res.status(500).json({ success: false, message: 'Error checking for overlapping schedules' });
-            });
-
-        }).catch(err => {
-            console.error('Duplicate check error:', err);
-            res.status(500).json({ success: false, message: 'Error checking for duplicate schedule' });
+            Description: Description || '',
+            StartTime,
+            EndTime,
+            Invited: Invited || [],
+            Status: false
         });
 
-    }).catch(err => {
-        console.error('Creator check error:', err);
-        res.status(500).json({ success: false, message: 'Server error while checking creator' });
-    });
+        console.log('Created schedule:', schedule);
+
+        res.json({ 
+            success: true, 
+            message: 'Schedule created successfully!',
+            schedule 
+        });
+
+    } catch (err) {
+        console.error('Schedule creation error:', err);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Server error while creating schedule' 
+        });
+    }
 });
 
 app.post('/api/schedule/edit', (req, res) => {
@@ -438,36 +393,62 @@ app.post('/api/schedule/leave', (req, res) => {
     });
 });
 
-app.post('/api/schedule/all', (req, res) => {
+app.post('/api/schedule/all', async (req, res) => {
     const { email } = req.body;
 
-    // Step 1: Find user by email
-    User.findOne({ email }).then(user => {
+    try {
+        // First find the user
+        const user = await User.findOne({ email });
         if (!user) {
-            return res.status(404).json({ success: false, message: 'User not found' });
+            return res.status(404).json({ 
+                success: false, 
+                message: 'User not found' 
+            });
         }
 
-        // Step 2: Find schedules where user is creator or invited
-        Schedule.find({
+        // Find all schedules where the user is either the creator or invited
+        const schedules = await Schedule.find({
             $or: [
                 { Creator: user._id },
-                { Invited: user._id }
+                { Invited: email }  // Changed: Simply check if email is in Invited array
             ]
         })
-        .populate('Creator', 'email username')   // Optionally populate creator info
-        .populate('Invited', 'email username')   // Optionally populate invited users
-        .then(schedules => {
-            res.json({ success: true, schedules });
+        .populate({
+            path: 'Creator',
+            select: 'email username'
         })
-        .catch(err => {
-            console.error('Error retrieving schedules:', err);
-            res.status(500).json({ success: false, message: 'Error fetching schedules' });
+        .sort({ StartTime: 1 });
+
+        // Transform the schedules to include additional information
+        const transformedSchedules = schedules.map(schedule => ({
+            _id: schedule._id,
+            Title: schedule.Title,
+            Description: schedule.Description,
+            StartTime: schedule.StartTime,
+            EndTime: schedule.EndTime,
+            Creator: {
+                email: schedule.Creator.email,
+                username: schedule.Creator.username
+            },
+            Invited: schedule.Invited,
+            Status: schedule.Status,
+            isCreator: schedule.Creator._id.toString() === user._id.toString(),
+            isInvited: schedule.Invited.includes(email)
+        }));
+
+        res.json({ 
+            success: true, 
+            schedules: transformedSchedules,
+            total: transformedSchedules.length
         });
 
-    }).catch(err => {
-        console.error('Error finding user:', err);
-        res.status(500).json({ success: false, message: 'Error looking up user' });
-    });
+    } catch (err) {
+        console.error('Error finding schedules:', err);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Server error while fetching schedules'
+        });
+    }
 });
 
 app.listen(PORT, () => {

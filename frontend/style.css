@@ -396,7 +396,7 @@ body {
   transition: max-height 0.5s ease;
 }
 .add-event-wrapper.active {
-  max-height: 300px;
+  max-height: 400px;
 }
 .add-event-header {
   width: 100%;
@@ -460,6 +460,7 @@ body {
   align-items: center;
   justify-content: center;
   padding: 20px;
+  
 }
 .add-event-footer .add-event-btn {
   height: 40px;
@@ -541,4 +542,58 @@ body {
   }
 }
 
+.invite-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 5px;
+  padding: 0 10px;
+}
 
+.invite-chip {
+  background: var(--primary-clr);
+  color: #fff;
+  padding: 2px 10px;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.invite-chip .remove {
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.event-invite-email {
+  width: 100%;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.event-invitees {
+  margin-top: 5px;
+  font-size: 0.8em;
+  color: #878895;
+  padding-left: 25px;
+}
+
+.creator-badge, .invited-badge {
+  font-size: 0.7em;
+  padding: 2px 6px;
+  border-radius: 10px;
+  margin-left: 10px;
+}
+
+.creator-badge {
+  background: #2da0a8;
+  color: white;
+}
+
+.invited-badge {
+  background: #878895;
+  color: white;
+}

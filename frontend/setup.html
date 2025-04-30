@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Server Setup</title>
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: url('images/login/workstation.jpg') no-repeat center/cover;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+        }
+        .setup-container {
+            background: rgba(255, 255, 255, 0.75);
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+            width: 90%;
+            max-width: 500px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px); 
+        }
+        h1 { color: #333; margin-bottom: 1rem; }
+        .input-group {
+            margin: 1rem 0;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.5); /* Semi-transparent white */
+                backdrop-filter: blur(10px); /* The blur effect */
+                -webkit-backdrop-filter: blur(10px); /* Safari support */
+        }
+        button {
+            background: #2da0a8;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 1rem;
+        }
+        button:hover {
+            background: #248f96;
+        }
+        .helper-text {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+        .success-message {
+            display: none;
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #66bb6a;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+        .success-message.show {
+            opacity: 1;
+            display: block;
+        }
+        .error-message {
+            display: none;
+            background-color: #ffebee;
+            color: #c62828;
+            border: 1px solid #ef5350;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+        .error-message.show {
+            opacity: 1;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="setup-container" style="text-align: center;" >
+        <img src="images/Logo/Infinite-logo.jpg" alt="Logo" style="width: 100px; height: 100px; border-radius: 50px; margin-bottom: -15px;">
+        <h1>Server Setup</h1>
+        <div class="success-message" id="successMessage">   
+            Server URL updated successfully! ✅
+        </div>
+        <div class="error-message" id="errorMessage">
+            Incorrect URL format. Please enter a valid ngrok URL.
+        </div>
+        <div class="input-group">
+            <input type="text" id="serverUrl" placeholder="Enter your ngrok HTTPS URL">
+            <div class="helper-text" style="text-align: center; color: #242020; align-items: center;">
+                Copy the HTTPS URL from the ngrok console  <br> (e.g. https://1234-56-78-910.ngrok-free.app)
+            </div>
+        </div>
+        <button onclick="saveUrl()">Continue to Login</button>
+    </div>
+
+    <script src="config.js"></script>
+    <script>
+        // Check if URL is already set
+        window.onload = () => {
+            const existingUrl = config.apiUrl;
+            if (existingUrl) {
+                document.getElementById('serverUrl').value = existingUrl;
+            }
+        }
+
+        function saveUrl() {
+            const url = document.getElementById('serverUrl').value.trim();
+            const successMessage = document.getElementById('successMessage');
+            const errorMessage = document.getElementById('errorMessage');
+            
+            // Hide both messages initially
+            successMessage.classList.remove('show');
+            errorMessage.classList.remove('show');
+
+            // Check if URL matches ngrok format
+            if (!url.match(/^https:\/\/.*\.ngrok(-free)?\.app$/)) {
+                errorMessage.classList.add('show');
+                return;
+            }
+
+            if (config.setApiUrl(url)) {
+                successMessage.classList.add('show');
+                setTimeout(() => {
+                    window.location.href = 'Login.html';
+                }, 150);
+            } else {
+                errorMessage.classList.add('show');
+            }
+        }
+    </script>
+</body>
+</html>

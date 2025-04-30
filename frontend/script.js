@@ -15,7 +15,9 @@ const calendar = document.querySelector(".calendar"),
   addEventTitle = document.querySelector(".event-name"),
   addEventFrom = document.querySelector(".event-time-from"),
   addEventTo = document.querySelector(".event-time-to"),
-  addEventSubmit = document.querySelector(".add-event-btn");
+  addEventSubmit = document.querySelector(".add-event-btn"),
+  addEventInvite = document.querySelector(".event-invite-email");
+  invitedEmails = new Set();
 
 let today = new Date();
 let activeDay;
@@ -37,24 +39,39 @@ const months = [
   "December",
 ];
 
-// const eventsArr = [
-//   {
-//     day: 13,
-//     month: 4,
-//     year: 2025,
-//     events: [
-//       {
-//         title: "Event 1 lorem ipsun dolar sit genfa tersd dsad ",
-//         time: "10:00 AM",
-//       },
-//       {
-//         title: "Event 2",
-//         time: "11:00 AM",
-//       },
-//     ],
-//   },
-// ];
+// Time utility functions
+function convertTime(time) {
+  let timeArr = time.split(":");
+  let timeHour = parseInt(timeArr[0]);
+  let timeMin = timeArr[1];
+  let timeFormat = timeHour >= 12 ? "PM" : "AM";
+  timeHour = timeHour % 12 || 12;
+  return timeHour + ":" + timeMin + " " + timeFormat;
+}
 
+function parseEventTime(timeStr, event) {
+  const [time, period] = timeStr.split(' ');
+  let [hours, minutes] = time.split(':');
+  hours = parseInt(hours);
+  
+  if (period === 'PM' && hours !== 12) hours += 12;
+  if (period === 'AM' && hours === 12) hours = 0;
+  
+  return new Date(event.year, event.month - 1, event.day, hours, parseInt(minutes));
+}
+
+function formatTime(date) {
+  let hours = date.getHours();
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+  const period = hours >= 12 ? 'PM' : 'AM';
+  
+  hours = hours % 12;
+  hours = hours ? hours : 12;
+  
+  return `${hours}:${minutes} ${period}`;
+}
+
+// Initialize empty events array and load events
 const eventsArr = [];
 getEvents();
 console.log(eventsArr);
@@ -192,6 +209,7 @@ function addListner() {
 }
 
 todayBtn.addEventListener("click", () => {
+  if (!getUserEmail()) return; // Check if user is logged in
   today = new Date();
   month = today.getMonth();
   year = today.getFullYear();
@@ -229,7 +247,7 @@ function gotoDate() {
   alert("Invalid Date");
 }
 
-//function get active day day name and date and update eventday eventdate
+//function
 function getActiveDay(date) {
   const day = new Date(year, month, date);
   const dayName = day.toString().split(" ")[0];
@@ -241,40 +259,65 @@ function getActiveDay(date) {
 function updateEvents(date) {
   let events = "";
   eventsArr.forEach((event) => {
-    if (
-      date === event.day &&
-      month + 1 === event.month &&
-      year === event.year
-    ) {
-      event.events.forEach((event) => {
-        events += `<div class="event">
-            <div class="title">
-              <i class="fas fa-circle"></i>
-              <h3 class="event-title">${event.title}</h3>
-            </div>
-            <div class="event-time">
-              <span class="event-time">${event.time}</span>
-            </div>
-        </div>`;
-      });
-    }
+      if (
+          date === event.day &&
+          month + 1 === event.month &&
+          year === event.year
+      ) {
+          event.events.forEach((evt) => {
+              const userEmail = getUserEmail();
+              const isCreator = evt.creator === userEmail;
+              const isInvited = evt.invited && evt.invited.includes(userEmail);
+
+              events += `
+                  <div class="event" data-id="${evt.id}">
+                      <div class="title">
+                          <i class="fas fa-circle"></i>
+                          <h3 class="event-title">${evt.title}</h3>
+                      </div>
+                      <div class="event-time">
+                          ${evt.time}
+                          ${isCreator ? 
+                              '<span class="creator-badge">Creator</span>' : 
+                              (isInvited ? '<span class="invited-badge">Invited</span>' : '')
+                          }
+                      </div>
+                      ${isCreator && evt.invited && evt.invited.length > 0 ? `
+                          <div class="event-invitees">
+                              Invited: ${evt.invited.join(', ')}
+                          </div>
+                      ` : ''}
+                  </div>`;
+          });
+      }
   });
+  
   if (events === "") {
-    events = `<div class="no-event">
-            <h3>No Events</h3>
-        </div>`;
+      events = `
+          <div class="no-event">
+              <h3>No Events</h3>
+          </div>`;
   }
   eventsContainer.innerHTML = events;
-  saveEvents();
 }
 
 //function to add event
 addEventBtn.addEventListener("click", () => {
+  if (!getUserEmail()) return; // Check if user is logged in
   addEventWrapper.classList.toggle("active");
 });
 
 addEventCloseBtn.addEventListener("click", () => {
   addEventWrapper.classList.remove("active");
+  addEventTitle.value = "";
+  addEventFrom.value = "";
+  addEventTo.value = "";
+  addEventInvite.value = "";
+  invitedEmails.clear();
+  const inviteList = document.querySelector('.invite-list');
+  if (inviteList) {
+    inviteList.innerHTML = '';
+  }
 });
 
 document.addEventListener("click", (e) => {
@@ -330,91 +373,98 @@ addEventTo.addEventListener("input", (e) => {
 });
 
 //function to add event to eventsArr
-addEventSubmit.addEventListener("click", () => {
+addEventSubmit.addEventListener("click", async () => {
   const eventTitle = addEventTitle.value;
   const eventTimeFrom = addEventFrom.value;
   const eventTimeTo = addEventTo.value;
+  const userEmail = getUserEmail();
+
+  if (!userEmail) {
+      alert("Please login first");
+      return;
+  }
+
   if (eventTitle === "" || eventTimeFrom === "" || eventTimeTo === "") {
-    alert("Please fill all the fields");
-    return;
+      alert("Please fill all the fields");
+      return;
   }
 
   //check correct time format 24 hour
   const timeFromArr = eventTimeFrom.split(":");
   const timeToArr = eventTimeTo.split(":");
   if (
-    timeFromArr.length !== 2 ||
-    timeToArr.length !== 2 ||
-    timeFromArr[0] > 23 ||
-    timeFromArr[1] > 59 ||
-    timeToArr[0] > 23 ||
-    timeToArr[1] > 59
+      timeFromArr.length !== 2 ||
+      timeToArr.length !== 2 ||
+      timeFromArr[0] > 23 ||
+      timeFromArr[1] > 59 ||
+      timeToArr[0] > 23 ||
+      timeToArr[1] > 59
   ) {
-    alert("Invalid Time Format");
-    return;
+      alert("Invalid Time Format");
+      return;
   }
 
-  const timeFrom = convertTime(eventTimeFrom);
-  const timeTo = convertTime(eventTimeTo);
+  // Create date objects for the event times
+  const startTime = new Date(year, month, activeDay);
+  startTime.setHours(parseInt(timeFromArr[0]), parseInt(timeFromArr[1]));
 
-  //check if event is already added
-  let eventExist = false;
-  eventsArr.forEach((event) => {
-    if (
-      event.day === activeDay &&
-      event.month === month + 1 &&
-      event.year === year
-    ) {
-      event.events.forEach((event) => {
-        if (event.title === eventTitle) {
-          eventExist = true;
-        }
+  const endTime = new Date(year, month, activeDay);
+  endTime.setHours(parseInt(timeToArr[0]), parseInt(timeToArr[1]));
+
+  // Prepare invited emails array
+  const invitedEmailsArray = Array.from(invitedEmails);
+
+  try {
+      console.log('Sending event data:', {
+          Title: eventTitle,
+          email: userEmail,
+          StartTime: startTime.toISOString(),
+          EndTime: endTime.toISOString(),
+          Invited: invitedEmailsArray
       });
-    }
-  });
-  if (eventExist) {
-    alert("Event already added");
-    return;
-  }
-  const newEvent = {
-    title: eventTitle,
-    time: timeFrom + " - " + timeTo,
-  };
-  console.log(newEvent);
-  console.log(activeDay);
-  let eventAdded = false;
-  if (eventsArr.length > 0) {
-    eventsArr.forEach((item) => {
-      if (
-        item.day === activeDay &&
-        item.month === month + 1 &&
-        item.year === year
-      ) {
-        item.events.push(newEvent);
-        eventAdded = true;
+
+      const response = await fetch(`${config.apiUrl}/api/schedule/add`, {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+              Title: eventTitle,
+              email: userEmail,
+              StartTime: startTime.toISOString(),
+              EndTime: endTime.toISOString(),
+              Invited: invitedEmailsArray
+          })
+      });
+
+      const data = await response.json();
+      console.log('Server response:', data);
+
+      if (data.success) {
+          // Clear form and UI
+          addEventWrapper.classList.remove("active");
+          addEventTitle.value = "";
+          addEventFrom.value = "";
+          addEventTo.value = "";
+          addEventInvite.value = "";
+          invitedEmails.clear();
+          updateInviteList();
+
+          // Refresh events
+          await getEvents();
+          updateEvents(activeDay);
+
+          // Update UI
+          const activeDayEl = document.querySelector(".day.active");
+          if (!activeDayEl.classList.contains("event")) {
+              activeDayEl.classList.add("event");
+          }
+      } else {
+          alert(data.message || "Failed to add event");
       }
-    });
-  }
-
-  if (!eventAdded) {
-    eventsArr.push({
-      day: activeDay,
-      month: month + 1,
-      year: year,
-      events: [newEvent],
-    });
-  }
-
-  console.log(eventsArr);
-  addEventWrapper.classList.remove("active");
-  addEventTitle.value = "";
-  addEventFrom.value = "";
-  addEventTo.value = "";
-  updateEvents(activeDay);
-  //select active day and add event class if not added
-  const activeDayEl = document.querySelector(".day.active");
-  if (!activeDayEl.classList.contains("event")) {
-    activeDayEl.classList.add("event");
+  } catch (error) {
+      console.error('Error adding event:', error);
+      alert("Failed to add event. Please try again.");
   }
 });
 
@@ -450,27 +500,286 @@ eventsContainer.addEventListener("click", (e) => {
   }
 });
 
-//function to save events in local storage
-function saveEvents() {
-  localStorage.setItem("events", JSON.stringify(eventsArr));
+function createInviteList() {
+  const container = document.createElement('div');
+  container.className = 'invite-list';
+  addEventInvite.parentNode.appendChild(container);
+  return container;
 }
 
-//function to get events from local storage
-function getEvents() {
-  //check if events are already saved in local storage then return event else nothing
-  if (localStorage.getItem("events") === null) {
-    return;
+// Add email validation function
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+// Add invite handling
+addEventSubmit.addEventListener("click", async () => {
+  const eventTitle = addEventTitle.value;
+  const eventTimeFrom = addEventFrom.value;
+  const eventTimeTo = addEventTo.value;
+  const userEmail = getUserEmail();
+
+  if (!userEmail) {
+      alert("Please login first");
+      return;
   }
-  eventsArr.push(...JSON.parse(localStorage.getItem("events")));
+
+  if (eventTitle === "" || eventTimeFrom === "" || eventTimeTo === "") {
+      alert("Please fill all the fields");
+      return;
+  }
+
+  //check correct time format 24 hour
+  const timeFromArr = eventTimeFrom.split(":");
+  const timeToArr = eventTimeTo.split(":");
+  if (
+      timeFromArr.length !== 2 ||
+      timeToArr.length !== 2 ||
+      timeFromArr[0] > 23 ||
+      timeFromArr[1] > 59 ||
+      timeToArr[0] > 23 ||
+      timeToArr[1] > 59
+  ) {
+      alert("Invalid Time Format");
+      return;
+  }
+
+  // Create date objects for the event times
+  const startTime = new Date(year, month, activeDay);
+  startTime.setHours(parseInt(timeFromArr[0]), parseInt(timeFromArr[1]));
+
+  const endTime = new Date(year, month, activeDay);
+  endTime.setHours(parseInt(timeToArr[0]), parseInt(timeToArr[1]));
+
+  // Prepare invited emails array
+  const invitedEmailsArray = Array.from(invitedEmails);
+
+  try {
+      const response = await fetch(`${config.apiUrl}/api/schedule/add`, {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+              Title: eventTitle,
+              email: userEmail,
+              Description: "", // You can add a description field if needed
+              StartTime: startTime.toISOString(),
+              EndTime: endTime.toISOString(),
+              Invited: invitedEmailsArray
+          })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+          // Clear form
+          addEventWrapper.classList.remove("active");
+          addEventTitle.value = "";
+          addEventFrom.value = "";
+          addEventTo.value = "";
+          addEventInvite.value = "";
+          invitedEmails.clear();
+          
+          // Clear invite list
+          const inviteList = document.querySelector('.invite-list');
+          if (inviteList) {
+              inviteList.innerHTML = '';
+          }
+
+          // Refresh events
+          await getEvents();
+          updateEvents(activeDay);
+
+          // Update UI
+          const activeDayEl = document.querySelector(".day.active");
+          if (!activeDayEl.classList.contains("event")) {
+              activeDayEl.classList.add("event");
+          }
+      } else {
+          alert(data.message || "Failed to add event");
+      }
+  } catch (error) {
+      console.error('Error adding event:', error);
+      alert("Failed to add event. Please try again.");
+  }
+});
+
+// Handle invite email input
+addEventInvite.addEventListener('keyup', (e) => {
+  if (e.key === 'Enter' || e.keyCode === 13) {
+      const email = e.target.value.trim();
+      if (email && isValidEmail(email)) {
+          invitedEmails.add(email);
+          e.target.value = '';
+          updateInviteList();
+      } else {
+          alert('Please enter a valid email address');
+      }
+  }
+});
+
+// Function to update the invite list display
+function updateInviteList() {
+  const inviteList = document.querySelector('.invite-list');
+  inviteList.innerHTML = '';
+  invitedEmails.forEach(email => {
+      const chip = document.createElement('div');
+      chip.className = 'invite-chip';
+      chip.innerHTML = `
+          ${email}
+          <span class="remove" onclick="removeInvite('${email}')">&times;</span>
+      `;
+      inviteList.appendChild(chip);
+  });
 }
 
-function convertTime(time) {
-  //convert time to 24 hour format
-  let timeArr = time.split(":");
-  let timeHour = timeArr[0];
-  let timeMin = timeArr[1];
-  let timeFormat = timeHour >= 12 ? "PM" : "AM";
-  timeHour = timeHour % 12 || 12;
-  time = timeHour + ":" + timeMin + " " + timeFormat;
-  return time;
+// Function to remove an invite
+function removeInvite(email) {
+  invitedEmails.delete(email);
+  updateInviteList();
 }
+
+// Add email validation function if not already present
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+//function to save events in local storage
+async function getEvents() {
+  const email = getUserEmail();
+  if (!email) {
+      console.error('No user email found');
+      return;
+  }
+
+  try {
+      const response = await fetch(`${config.apiUrl}/api/schedule/all`, {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email })
+      });
+      
+      if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to fetch events');
+      }
+
+      const data = await response.json();
+      if (data.success && data.schedules) {
+          // Clear existing events
+          eventsArr.length = 0;
+          
+          // Create a map to store events by date
+          const eventsByDate = new Map();
+          
+          // Convert backend format to frontend format and group by date
+          data.schedules.forEach(schedule => {
+              const startDate = new Date(schedule.StartTime);
+              const endDate = new Date(schedule.EndTime);
+              
+              const dateKey = `${startDate.getDate()}-${startDate.getMonth()}-${startDate.getFullYear()}`;
+              
+              if (!eventsByDate.has(dateKey)) {
+                  eventsByDate.set(dateKey, {
+                      day: startDate.getDate(),
+                      month: startDate.getMonth() + 1,
+                      year: startDate.getFullYear(),
+                      events: []
+                  });
+              }
+              
+              eventsByDate.get(dateKey).events.push({
+                  id: schedule._id,
+                  title: schedule.Title,
+                  time: `${formatTime(startDate)} - ${formatTime(endDate)}`,
+                  description: schedule.Description,
+                  creator: schedule.Creator.email,
+                  invited: schedule.Invited,
+                  isCreator: schedule.isCreator,
+                  isInvited: schedule.isInvited
+              });
+          });
+          
+          // Convert map values to array
+          eventsArr.push(...eventsByDate.values());
+          
+          initCalendar(); // Refresh calendar display
+      }
+  } catch (err) {
+      console.error('Error fetching events:', err);
+      alert('Error loading events. Please try again.');
+  }
+}
+
+// Update getEvents function to properly format received events
+async function getEvents() {
+  const email = getUserEmail();
+  if (!email) {
+      console.error('No user email found');
+      return;
+  }
+
+  try {
+      const response = await fetch(`${config.apiUrl}/api/schedule/all`, {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email })
+      });
+      
+      if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to fetch events');
+      }
+
+      const data = await response.json();
+      if (data.success && data.schedules) {
+          // Clear existing events
+          eventsArr.length = 0;
+          
+          // Create a map to store events by date
+          const eventsByDate = new Map();
+          
+          // Convert backend format to frontend format and group by date
+          data.schedules.forEach(schedule => {
+              const startDate = new Date(schedule.StartTime);
+              const endDate = new Date(schedule.EndTime);
+              
+              const dateKey = `${startDate.getDate()}-${startDate.getMonth()}-${startDate.getFullYear()}`;
+              
+              if (!eventsByDate.has(dateKey)) {
+                  eventsByDate.set(dateKey, {
+                      day: startDate.getDate(),
+                      month: startDate.getMonth() + 1,
+                      year: startDate.getFullYear(),
+                      events: []
+                  });
+              }
+              
+              eventsByDate.get(dateKey).events.push({
+                  title: schedule.Title,
+                  time: `${formatTime(startDate)} - ${formatTime(endDate)}`
+              });
+          });
+          
+          // Convert map values to array
+          eventsArr.push(...eventsByDate.values());
+          
+          initCalendar(); // Refresh calendar display
+      }
+  } catch (err) {
+      console.error('Error fetching events:', err);
+      alert('Error loading events. Please try again.');
+  }
+}
+
+window.onload = () => {
+    if (!getUserEmail()) {
+        return; // This will redirect to login if not logged in
+    }
+    initCalendar();
+};
